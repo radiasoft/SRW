@@ -3,17 +3,16 @@ import re
 import sys
 import subprocess
 
-from distutils.version import LooseVersion
+#from distutils.version import LooseVersion
+from packaging import version #HG10032025 Update to remove distutils usage (distutils is deprecated)
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
-
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir='', package_name=''):
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
         self.package_name = package_name
-
 
 class CMakeBuild(build_ext):
     def __init__(self, *args, **kwargs):
@@ -34,8 +33,10 @@ class CMakeBuild(build_ext):
                     "CMake must be installed to build the following extensions: " +
                     ", ".join(e.name for e in self.extensions))
 
-        cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)',
-                                     out.decode()).group(1))
+        #cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)',
+        #                             out.decode()).group(1))
+        cmake_version = out.decode('utf-8').splitlines()[0].split()[2] #HG10032025 Update to remove distutils usage (distutils is deprecated)
+        
         if cmake_version < '3.12.0':
             raise RuntimeError("CMake >= 3.12.0 is required.")
 
@@ -86,7 +87,7 @@ with open(os.path.join(base_dir, 'requirements.txt')) as requirements_file:
                     if not line.startswith('#')]
 
 setup(name='srwpy',
-      version='4.1.1', #'4.1.0', #'4.0.0b1',
+      version='4.2.1', #'4.2.0', #'4.1.1', #'4.1.0', #'4.0.0b1',
       description='This is SRW for Python',
       author='O. Chubar et al.',
       author_email='chubar@bnl.gov',
